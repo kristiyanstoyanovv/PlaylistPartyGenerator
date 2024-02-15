@@ -11,10 +11,10 @@
 <body>
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-4 mt-5">
+        <div class="col-md-6 col-lg-5 mt-5">
             <div class="card">
                 <div class="card-body">
-                    <h2 class="text-center mb-4">Welcome to PPG, developed by K.S.</h2>
+                    <h2 class="text-center mb-4">Playlist Party Generator</h2>
                     <form action="#" th:action="@{register}" th:object="${userModel}" method="POST">
 
                         <div class = "alert alert-danger" th:if="${#fields.hasAnyErrors()}">

@@ -4,6 +4,7 @@ import com.playlistgenerator.kris.user.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -23,9 +24,8 @@ public class TokenService {
         return tokenRepository.save(token);
     }
     @Transactional
-    public int setConfirmedAt(TokenEntity token) {
-        return tokenRepository.updateConfirmedAt(
-                token.getToken(),LocalDateTime.now());
+    public int setConfirmedAt(TokenEntity token, LocalDateTime time) {
+        return tokenRepository.updateConfirmedAt(token.getTokenId(),time);
     }
 
 

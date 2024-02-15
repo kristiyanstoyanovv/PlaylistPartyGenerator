@@ -19,9 +19,12 @@ public class PlaylistGeneratorApplication {
 	public CommandLineRunner commandLineRunner(UserService userService, SongService songService) {
 		return args -> {
 			UserEntity admin = new UserEntity("admin", "admin", "admin@ppg.com");
+			UserEntity user = new UserEntity("darkhid3","123456789","darkhid3@gmail.com");
+			user.setEnabled(true);
 			admin.setRole("ADMIN");
 			admin.setEnabled(true);
 			userService.createUser(admin);
+			userService.createUser(user);
 
 
 //			System.out.println(userService.findByEmail("admin@ppg.com"));

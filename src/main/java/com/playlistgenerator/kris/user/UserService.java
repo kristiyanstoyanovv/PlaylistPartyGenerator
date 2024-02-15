@@ -42,8 +42,16 @@ public class UserService implements UserDetailsService {
         return userRepository.findByEmail(email).isPresent();
     }
 
+    @Transactional
     public int enableUser(Long id) {
         return userRepository.updateEnableStatusById(id, true);
+    }
+
+    @Transactional
+    public int updatePassword(UserEntity user) {
+        String hashedPassword = passwordEncoder.encode(user.getPassword());
+        return userRepository.updatePasswordById(user.getUserId(), hashedPassword);
+
     }
 
     @Override
