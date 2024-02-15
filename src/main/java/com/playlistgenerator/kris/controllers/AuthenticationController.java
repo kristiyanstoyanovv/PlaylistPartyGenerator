@@ -8,15 +8,12 @@ import com.playlistgenerator.kris.user.UserModel;
 import com.playlistgenerator.kris.user.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,7 +34,7 @@ public class AuthenticationController {
 
     @GetMapping("/login")
     public String showLoginPage() {
-        System.out.println("Login form");
+        //System.out.println("Login form");
         return "authentication/login-page";
     }
 
@@ -45,7 +42,7 @@ public class AuthenticationController {
     public String showRegisterPage(Model model) {
         UserModel userModel = new UserModel();
         model.addAttribute("userModel", userModel);
-        System.out.println("Register form");
+        //System.out.println("Register form");
         return "authentication/register-page";
     }
 
@@ -77,7 +74,7 @@ public class AuthenticationController {
         UserEntity user = new UserEntity(userModel);
         userService.createUser(user);
         tokenService.saveToken(new TokenEntity(user, token, LocalDateTime.now()));
-        System.out.println("Successfully registered");
+        //System.out.println("Successfully registered");
         String link = "http://localhost:8080/auth/register/confirm?token="+token;
         emailService.send(user.getEmail(),
                           emailService.buildConfirmationEmail(user.getUsername(), link),
@@ -116,7 +113,7 @@ public class AuthenticationController {
 
     @GetMapping("/password")
     public String showPasswordRecoveryPage() {
-        System.out.println("Password recovery form");
+        //System.out.println("Password recovery form");
         return "authentication/password-recovery-page";
     }
 
@@ -134,8 +131,7 @@ public class AuthenticationController {
         TokenEntity tokenObject = new TokenEntity(userObject.get(),token,LocalDateTime.now());
         tokenService.saveToken(tokenObject);
         String message = emailService.buildPasswordRecoveryEmail(userObject.get().getUsername(),link);
-        System.out.println(link);
-        //emailService.send(email,message,"PPG | Password recovery");
+        emailService.send(email,message,"PPG | Reset password");
         redirectAttributes.addFlashAttribute("passwordRecoveryRequested",200);
         return "redirect:/auth/login";
     }
@@ -144,6 +140,9 @@ public class AuthenticationController {
     public String confirmPasswordRecovery(@RequestParam("token") String token,
                                           RedirectAttributes redirectAttributes,
                                           HttpSession session) {
+
+        if (session.getAttribute("passwordResetToken") != null)
+            return "authentication/password-recovery-page-two";
 
         Optional<TokenEntity> tokenObject = tokenService.getToken(token);
 
@@ -163,7 +162,7 @@ public class AuthenticationController {
             return "redirect:/auth/login";
         }
 
-        session.setAttribute("passwordResetToken", token);
+        session.setAttribute("passwordResetToken", tokenObject.get());
         return "authentication/password-recovery-page-two";
     }
 
@@ -172,21 +171,18 @@ public class AuthenticationController {
                                        @RequestParam("password") String password,
                                        @RequestParam("confirmPassword") String confirmPassword,
                                        RedirectAttributes redirectAttributes) {
-        String token = session.getAttribute("passwordResetToken").toString();
+        TokenEntity tokenObject = (TokenEntity) session.getAttribute("passwordResetToken");
         if (!password.equals(confirmPassword)) {
             redirectAttributes.addFlashAttribute("passwordsNotMatching","400");
-            return "redirect:/auth/password/reset?token=" + token;
+            return "redirect:/auth/password/reset?token=" + tokenObject.getToken();
         }
 
-        Optional<TokenEntity> tokenObject = tokenService.getToken(token);
-        if (tokenObject.isPresent()) {
-            UserEntity user = tokenObject.get().getUser();
-            user.setPassword(password);
-            tokenService.setConfirmedAt(tokenObject.get(), LocalDateTime.now());
-            userService.updatePassword(user);
-            session.removeAttribute("passwordResetToken");
-            redirectAttributes.addFlashAttribute("passwordChangedSuccessfully",200);
-        }
+        UserEntity user = tokenObject.getUser();
+        user.setPassword(password);
+        tokenService.setConfirmedAt(tokenObject, LocalDateTime.now());
+        userService.updatePassword(user);
+        session.removeAttribute("passwordResetToken");
+        redirectAttributes.addFlashAttribute("passwordChangedSuccessfully",200);
         return "redirect:/auth/login";
     }
 
