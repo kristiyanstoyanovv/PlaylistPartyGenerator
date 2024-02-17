@@ -39,9 +39,9 @@ public class SecurityConfig {
                             .loginProcessingUrl("/auth/authenticate")
                             .permitAll()
                 )
-                .exceptionHandling(configurer -> configurer.accessDeniedPage("/access-denied"))
-                .logout(logout -> logout.permitAll()
-                );
+                .exceptionHandling(configurer -> configurer.accessDeniedPage("/error"))
+                .logout(logout -> logout.permitAll())
+                ;
         return http.build();
     }
     @Bean
