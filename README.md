@@ -14,5 +14,6 @@ or resetting the password requires a confirmation using validation tokens.
 The application generates a random validation token placed in a link,
 which is send to the user's e-mail, the user needs to confirm the action with clicking on
 the link received on his e-mail.
+
 IMPORTANT:
 Each user password is encrypted and stored in the database using BCrypt algorithm.
